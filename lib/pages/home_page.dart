@@ -11,58 +11,59 @@ class HomePage extends StatelessWidget {
       body: Row(
         children: [
           // Menu fixo à esquerda
-          Container(
-            width: 200,
-            color: Color(0xFF111827),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Icon(
-                    Icons.account_balance_wallet,
-                    color: Colors.white,
-                    size: 48,
+          if (MediaQuery.of(context).size.width >
+              600) // Só mostra o menu lateral em telas maiores
+            Container(
+              width: 200,
+              color: Color(0xFF111827),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Icon(
+                      Icons.account_balance_wallet,
+                      color: Colors.white,
+                      size: 48,
+                    ),
                   ),
-                ),
-                ListTile(
-                  leading: Icon(Icons.account_balance, color: Colors.white),
-                  title: Text('Bancos', style: TextStyle(color: Colors.white)),
-                  onTap: () =>
-                      Navigator.pushNamed(context, '/bank_registration'),
-                ),
-                ListTile(
-                  leading: Icon(Icons.business, color: Colors.white),
-                  title:
-                      Text('Empresas', style: TextStyle(color: Colors.white)),
-                  onTap: () =>
-                      Navigator.pushNamed(context, '/company_registration'),
-                ),
-                ListTile(
-                  leading: Icon(Icons.savings, color: Colors.white),
-                  title:
-                      Text('Poupança', style: TextStyle(color: Colors.white)),
-                  onTap: () => Navigator.pushNamed(context, '/savings'),
-                ),
-                ListTile(
-                  leading: Icon(Icons.category, color: Colors.white),
-                  title:
-                      Text('Categorias', style: TextStyle(color: Colors.white)),
-                  onTap: () => Navigator.pushNamed(context, '/categories'),
-                ),
-              ],
+                  _buildMenuItem(context, 'Bancos', Icons.account_balance,
+                      '/bank_registration'),
+                  _buildMenuItem(context, 'Empresas', Icons.business,
+                      '/company_registration'),
+                  _buildMenuItem(
+                      context, 'Despesas', Icons.money_off, '/expenses'),
+                  _buildMenuItem(
+                      context, 'Entradas', Icons.attach_money, '/income'),
+                  _buildMenuItem(
+                      context, 'Poupança', Icons.savings, '/savings'),
+                  _buildMenuItem(
+                      context, 'Categorias', Icons.category, '/categories'),
+                ],
+              ),
             ),
-          ),
           // Conteúdo principal
           Expanded(
             child: Column(
               children: [
-                // Barra superior com ícone de notificação
+                // Barra superior com ícone de notificação e menu hamburguer para mobile
                 Container(
                   height: 60,
                   color: Color(0xFF111827),
-                  alignment: Alignment.centerRight,
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Icon(Icons.notifications, color: Colors.white),
+                  child: Row(
+                    children: [
+                      if (MediaQuery.of(context).size.width <= 600)
+                        IconButton(
+                          icon: Icon(Icons.menu, color: Colors.white),
+                          onPressed: () {
+                            // Abre o drawer com o menu
+                            Scaffold.of(context).openDrawer();
+                          },
+                        ),
+                      Spacer(),
+                      Icon(Icons.notifications, color: Colors.white),
+                      SizedBox(width: 16),
+                    ],
+                  ),
                 ),
                 // Conteúdo rolável
                 Expanded(
@@ -72,23 +73,39 @@ class HomePage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Molduras
-                        GridView.count(
-                          crossAxisCount: 3,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          children: [
-                            _buildInfoCard('Poupança', 5000, Colors.blue),
-                            _buildInfoCard('Despesas', 3000, Colors.red),
-                            _buildInfoCard('Entrada', 7000, Colors.green),
-                            _buildInfoCard('VA', 500, Colors.orange),
-                            _buildInfoCard('Clientes', 5, Colors.purple),
-                            _buildInfoCard('Descontos', 1000, Colors.teal),
-                          ],
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            // Calcula o número de colunas com base na largura da tela
+                            int crossAxisCount =
+                                MediaQuery.of(context).size.width > 600 ? 3 : 2;
+                            double cardWidth = (constraints.maxWidth -
+                                    (16 * (crossAxisCount - 1))) /
+                                crossAxisCount;
+                            // Aumenta o tamanho em 5% (multiplica por 0.35 em vez de 0.3)
+                            double finalCardWidth = cardWidth * 0.35;
+                            double finalCardHeight = finalCardWidth;
+
+                            return Wrap(
+                              spacing: 16,
+                              runSpacing: 16,
+                              children: [
+                                _buildInfoCard('Poupança', 5000, Colors.blue,
+                                    finalCardWidth, finalCardHeight),
+                                _buildInfoCard('Despesas', 3000, Colors.red,
+                                    finalCardWidth, finalCardHeight),
+                                _buildInfoCard('Entrada', 7000, Colors.green,
+                                    finalCardWidth, finalCardHeight),
+                                _buildInfoCard('VA', 500, Colors.orange,
+                                    finalCardWidth, finalCardHeight),
+                                _buildInfoCard('Clientes', 5, Colors.purple,
+                                    finalCardWidth, finalCardHeight),
+                                _buildInfoCard('Descontos', 1000, Colors.teal,
+                                    finalCardWidth, finalCardHeight),
+                              ],
+                            );
+                          },
                         ),
                         SizedBox(height: 24),
-                        // Grid de despesas
                         Text(
                           'Despesas do Mês',
                           style: TextStyle(
@@ -107,33 +124,84 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
+      // Drawer para menu em dispositivos móveis
+      drawer: MediaQuery.of(context).size.width <= 600
+          ? Drawer(
+              child: Container(
+                color: Color(0xFF111827),
+                child: ListView(
+                  children: [
+                    DrawerHeader(
+                      decoration: BoxDecoration(color: Color(0xFF1F2937)),
+                      child: Icon(
+                        Icons.account_balance_wallet,
+                        color: Colors.white,
+                        size: 48,
+                      ),
+                    ),
+                    _buildMenuItem(context, 'Bancos', Icons.account_balance,
+                        '/bank_registration'),
+                    _buildMenuItem(context, 'Empresas', Icons.business,
+                        '/company_registration'),
+                    _buildMenuItem(
+                        context, 'Despesas', Icons.money_off, '/expenses'),
+                    _buildMenuItem(
+                        context, 'Entradas', Icons.attach_money, '/income'),
+                    _buildMenuItem(
+                        context, 'Poupança', Icons.savings, '/savings'),
+                    _buildMenuItem(
+                        context, 'Categorias', Icons.category, '/categories'),
+                  ],
+                ),
+              ),
+            )
+          : null,
     );
   }
 
-  Widget _buildInfoCard(String title, double value, Color color) {
-    return Card(
-      color: color.withOpacity(0.2),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              title,
-              style: TextStyle(color: Colors.white, fontSize: 16),
-            ),
-            SizedBox(height: 8),
-            Text(
-              title == 'Clientes'
-                  ? value.toStringAsFixed(0)
-                  : currencyFormat.format(value),
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold),
-            ),
-          ],
+  Widget _buildMenuItem(
+      BuildContext context, String title, IconData icon, String route) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.white),
+      title: Text(title, style: TextStyle(color: Colors.white)),
+      onTap: () => Navigator.pushNamed(context, route),
+    );
+  }
+
+  Widget _buildInfoCard(
+      String title, double value, Color color, double width, double height) {
+    return Container(
+      width: width,
+      height: height,
+      child: Card(
+        color: color.withOpacity(0.2),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        child: Padding(
+          padding: EdgeInsets.all(4),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                title,
+                style: TextStyle(color: Colors.white, fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 2),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  title == 'Clientes'
+                      ? value.toStringAsFixed(0)
+                      : currencyFormat.format(value),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -169,7 +237,6 @@ class HomePage extends StatelessWidget {
               'Pendente', '-'),
           _buildExpenseRow(
               '2023-05-20', 'Moradia', 'Aluguel', 1200.00, 'Pendente', '-'),
-          // Adicione mais linhas conforme necessário
         ],
       ),
     );

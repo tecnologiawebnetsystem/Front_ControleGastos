@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hello_world/models/bank.dart';
+import 'package:controle_gasto_pessoal/models/bank.dart';
 
 class BankRegistrationPage extends StatefulWidget {
   @override
@@ -9,9 +9,9 @@ class BankRegistrationPage extends StatefulWidget {
 class _BankRegistrationPageState extends State<BankRegistrationPage> {
   final _formKey = GlobalKey<FormState>();
   String? selectedBank;
-  String agency = '';
-  String account = '';
-  String pix = '';
+  TextEditingController _agencyController = TextEditingController();
+  TextEditingController _accountController = TextEditingController();
+  TextEditingController _pixController = TextEditingController();
   List<RegisteredBank> registeredBanks = [];
   TextEditingController _searchController = TextEditingController();
 
@@ -23,24 +23,36 @@ class _BankRegistrationPageState extends State<BankRegistrationPage> {
     Bank(code: '237', name: 'Bradesco'),
   ];
 
+  @override
+  void dispose() {
+    _agencyController.dispose();
+    _accountController.dispose();
+    _pixController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
   void _addBank() {
     if (_formKey.currentState!.validate() && selectedBank != null) {
       setState(() {
         registeredBanks.add(RegisteredBank(
           bank: bankList.firstWhere((bank) => bank.code == selectedBank),
-          agency: agency,
-          account: account,
-          pix: pix,
+          agency: _agencyController.text,
+          account: _accountController.text,
+          pix: _pixController.text,
         ));
       });
-      // Clear form
-      setState(() {
-        selectedBank = null;
-        agency = '';
-        account = '';
-        pix = '';
-      });
+      _resetForm();
     }
+  }
+
+  void _resetForm() {
+    setState(() {
+      selectedBank = null;
+      _agencyController.clear();
+      _accountController.clear();
+      _pixController.clear();
+    });
   }
 
   @override
@@ -100,7 +112,7 @@ class _BankRegistrationPageState extends State<BankRegistrationPage> {
                           ),
                         ),
                         style: TextStyle(color: Colors.white),
-                        onChanged: (value) => agency = value,
+                        controller: _agencyController,
                       ),
                       SizedBox(height: 16),
                       TextFormField(
@@ -113,7 +125,7 @@ class _BankRegistrationPageState extends State<BankRegistrationPage> {
                           ),
                         ),
                         style: TextStyle(color: Colors.white),
-                        onChanged: (value) => account = value,
+                        controller: _accountController,
                       ),
                       SizedBox(height: 16),
                       TextFormField(
@@ -126,7 +138,7 @@ class _BankRegistrationPageState extends State<BankRegistrationPage> {
                           ),
                         ),
                         style: TextStyle(color: Colors.white),
-                        onChanged: (value) => pix = value,
+                        controller: _pixController,
                       ),
                       SizedBox(height: 16),
                       ElevatedButton(

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:hello_world/models/bank.dart';
+import 'package:controle_gasto_pessoal/models/bank.dart';
 
 class BankApiService {
   static const String baseUrl = 'https://brasilapi.com.br/api/banks/v1';

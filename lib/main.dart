@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:hello_world/pages/home_page.dart';
-import 'package:hello_world/theme/app_theme.dart';
-import 'package:hello_world/pages/bank_registration_page.dart';
-import 'package:hello_world/pages/company_registration_page.dart';
-import 'package:hello_world/pages/savings_page.dart';
-import 'package:hello_world/pages/category_page.dart';
+import 'package:controle_gasto_pessoal/pages/home_page.dart';
+import 'package:controle_gasto_pessoal/theme/app_theme.dart';
+import 'package:controle_gasto_pessoal/pages/bank_registration_page.dart';
+import 'package:controle_gasto_pessoal/pages/company_registration_page.dart';
+import 'package:controle_gasto_pessoal/pages/savings_page.dart';
+import 'package:controle_gasto_pessoal/pages/category_page.dart';
+import 'package:controle_gasto_pessoal/pages/expenses_page.dart';
+import 'package:controle_gasto_pessoal/pages/income_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -22,6 +24,8 @@ class MyApp extends StatelessWidget {
         '/company_registration': (context) => CompanyRegistrationPage(),
         '/savings': (context) => SavingsPage(),
         '/categories': (context) => CategoryPage(),
+        '/expenses': (context) => ExpensesPage(),
+        '/income': (context) => IncomePage(),
       },
     );
   }

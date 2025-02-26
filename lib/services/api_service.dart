@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:hello_world/models/transaction.dart';
+import 'package:controle_gasto_pessoal/models/transaction.dart';
 
 class ApiService {
   static const String baseUrl =
