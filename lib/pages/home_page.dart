@@ -101,11 +101,9 @@ class HomePage extends StatelessWidget {
                                     finalCardWidth, finalCardHeight),
                                 _buildInfoCard('Salário', 7000, Colors.green,
                                     finalCardWidth, finalCardHeight),
-                                _buildInfoCard('Descontos', 1000, Colors.teal,
+                                _buildInfoCard('Crédito', 1000, Colors.teal,
                                     finalCardWidth, finalCardHeight),
-                                _buildInfoCard('VA', 500, Colors.orange,
-                                    finalCardWidth, finalCardHeight),
-                                _buildInfoCard('Clientes', 5, Colors.purple,
+                                _buildInfoCard('Empresas', 5, Colors.purple,
                                     finalCardWidth, finalCardHeight),
                               ],
                             );
@@ -113,7 +111,7 @@ class HomePage extends StatelessWidget {
                         ),
                         SizedBox(height: 24),
                         Text(
-                          'Despesas do Mês',
+                          'Movimentação do Mês - Março/2025',
                           style: TextStyle(
                               color: Colors.white,
                               fontSize: 20,
