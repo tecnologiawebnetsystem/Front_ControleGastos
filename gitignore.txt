@@ -1,0 +1,50 @@
+# Flutter/Dart específico
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+ios/
+android/
+macos/
+windows/
+linux/
+
+# Relacionado ao IntelliJ
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Relacionado ao VS Code
+.vscode/
+
+# Relacionado ao Flutter/Dart/Pub
+**/doc/api/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# Relacionado à Web
+lib/generated_plugin_registrant.dart
+
+# Relacionado à simbolização
+app.*.symbols
+
+# Relacionado à ofuscação
+app.*.map.json
+
+# O Android Studio colocará artefatos de construção aqui
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Vercel
+.vercel
+
