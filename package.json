@@ -1,0 +1,15 @@
+{
+  "name": "controle-gastos-pessoal",
+  "version": "1.0.0",
+  "description": "Aplicativo de controle financeiro pessoal em Flutter",
+  "private": true,
+  "scripts": {
+    "build": "sh ./build.sh"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
+
