@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:controle_gasto_pessoal/config/environment.dart';
+import 'dart:async';
 
 class ApiService {
   // URL base da API obtida da configuração de ambiente
@@ -33,12 +34,15 @@ class ApiService {
   // Método GET
   Future<dynamic> get(String endpoint) async {
     try {
+      final url = Uri.parse('$baseUrl/$endpoint');
+
       if (kDebugMode) {
-        print('GET: $baseUrl/$endpoint');
+        print('GET: $url');
+        print('Headers: $_getHeaders');
       }
 
       final response = await http.get(
-        Uri.parse('$baseUrl/$endpoint'),
+        url,
         headers: _getHeaders,
       );
 
@@ -52,16 +56,27 @@ class ApiService {
   // Método POST
   Future<dynamic> post(String endpoint, dynamic data) async {
     try {
+      final url = Uri.parse('$baseUrl/$endpoint');
+      final body = json.encode(data);
+
       if (kDebugMode) {
-        print('POST: $baseUrl/$endpoint');
-        print('Data: ${json.encode(data)}');
+        print('POST: $url');
+        print('Headers: $_getHeaders');
+        print('Data: $body');
       }
 
-      final response = await http.post(
-        Uri.parse('$baseUrl/$endpoint'),
+      final response = await http
+          .post(
+        url,
         headers: _getHeaders,
-        body: json.encode(data),
-      );
+        body: body,
+      )
+          .timeout(Duration(seconds: 30), onTimeout: () {
+        if (kDebugMode) {
+          print('Timeout na requisição POST para $url');
+        }
+        throw TimeoutException('A requisição excedeu o tempo limite');
+      });
 
       return _processResponse(response);
     } catch (e) {
@@ -73,15 +88,19 @@ class ApiService {
   // Método PUT
   Future<dynamic> put(String endpoint, dynamic data) async {
     try {
+      final url = Uri.parse('$baseUrl/$endpoint');
+      final body = json.encode(data);
+
       if (kDebugMode) {
-        print('PUT: $baseUrl/$endpoint');
-        print('Data: ${json.encode(data)}');
+        print('PUT: $url');
+        print('Headers: $_getHeaders');
+        print('Data: $body');
       }
 
       final response = await http.put(
-        Uri.parse('$baseUrl/$endpoint'),
+        url,
         headers: _getHeaders,
-        body: json.encode(data),
+        body: body,
       );
 
       return _processResponse(response);
@@ -94,12 +113,15 @@ class ApiService {
   // Método DELETE
   Future<dynamic> delete(String endpoint) async {
     try {
+      final url = Uri.parse('$baseUrl/$endpoint');
+
       if (kDebugMode) {
-        print('DELETE: $baseUrl/$endpoint');
+        print('DELETE: $url');
+        print('Headers: $_getHeaders');
       }
 
       final response = await http.delete(
-        Uri.parse('$baseUrl/$endpoint'),
+        url,
         headers: _getHeaders,
       );
 
@@ -140,10 +162,16 @@ class ApiService {
     String message = 'Erro desconhecido';
 
     try {
-      final body = json.decode(response.body);
-      message = body['message'] ?? body['error'] ?? 'Erro desconhecido';
+      if (response.body.isNotEmpty) {
+        final body = json.decode(response.body);
+        message = body['message'] ?? body['error'] ?? 'Erro desconhecido';
+      }
     } catch (e) {
-      message = response.body;
+      message = response.body.isNotEmpty ? response.body : 'Erro desconhecido';
+    }
+
+    if (kDebugMode) {
+      print('Erro HTTP $statusCode: $message');
     }
 
     switch (statusCode) {
@@ -166,6 +194,10 @@ class ApiService {
   void _handleError(dynamic error) {
     if (kDebugMode) {
       print('Erro na API: $error');
+      print('Tipo de erro: ${error.runtimeType}');
+      if (error is Error) {
+        print('Stack trace: ${error.stackTrace}');
+      }
     }
   }
 }

@@ -1,27 +1,22 @@
 name: controle_gasto_pessoal
-description: "Controle de Gasto Pessoal."
-
-publish_to: 'none'
-
-version: 1.0.0+1
+description: Aplicativo de controle financeiro pessoal
+version: 1.0.0
 
 environment:
-  sdk: ">=2.19.0 <4.0.0"
-  flutter: ">=3.0.0"
+  sdk: '>=2.17.0 <3.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  http: ^1.1.0
-  fl_chart: ^0.63.0
-  intl: ^0.18.1
-  pdf: ^3.8.4
-  printing: ^5.9.3
+  http: ^0.13.5
+  intl: ^0.17.0
+  shared_preferences: ^2.0.15
+  cupertino_icons: ^1.0.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^2.0.0
 
 flutter:
   uses-material-design: true

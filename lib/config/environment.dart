@@ -5,11 +5,13 @@ enum Environment {
 
 class AppConfig {
   // Defina o ambiente atual aqui
-  static const Environment currentEnvironment = Environment.development;
+  static const Environment currentEnvironment = Environment.production;
 
   // URLs da API para cada ambiente
   static const Map<Environment, String> _apiBaseUrls = {
-    Environment.development: 'http://localhost:3000/api',
+    // Use o IP da sua máquina na rede local em vez de localhost
+    Environment.development:
+        'http://192.168.18.10:3000/api', // Substitua X.Y pelo seu IP real
     Environment.production: 'https://controle-gastos-api.onrender.com/api',
   };
 

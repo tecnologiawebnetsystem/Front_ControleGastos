@@ -6,10 +6,10 @@
   "scripts": {
     "build": "sh ./build.sh"
   },
-  "dependencies": {},
-  "devDependencies": {},
+  "dependencies": {
+    "cors": "^2.8.5"
+  },
   "engines": {
     "node": ">=14.0.0"
   }
 }
-
