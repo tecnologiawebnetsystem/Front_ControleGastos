@@ -31,8 +31,45 @@ class AuthResponse {
     Map<String, dynamic>? userData;
     if (json['data'] != null && json['data'] is Map) {
       userData = Map<String, dynamic>.from(json['data']);
+
+      // Adicionar log para verificar os dados do usuário
+      if (kDebugMode) {
+        print('Dados do usuário extraídos: $userData');
+      }
     } else if (json['user'] != null && json['user'] is Map) {
       userData = Map<String, dynamic>.from(json['user']);
+
+      // Adicionar log para verificar os dados do usuário
+      if (kDebugMode) {
+        print('Dados do usuário extraídos (de user): $userData');
+      }
+    }
+
+    // Verificar se há campos específicos do banco de dados
+    if (userData != null) {
+      // Verificar e mapear campos específicos do banco de dados
+      if (userData.containsKey('UsuarioID')) {
+        userData['id'] = userData['UsuarioID'];
+      }
+      if (userData.containsKey('Nome')) {
+        userData['nome'] = userData['Nome'];
+      }
+      if (userData.containsKey('Email')) {
+        userData['email'] = userData['Email'];
+      }
+      if (userData.containsKey('Login')) {
+        userData['login'] = userData['Login'];
+      }
+      if (userData.containsKey('Adm')) {
+        userData['adm'] = userData['Adm'];
+      }
+      if (userData.containsKey('Ativo')) {
+        userData['ativo'] = userData['Ativo'];
+      }
+
+      if (kDebugMode) {
+        print('Dados do usuário normalizados: $userData');
+      }
     }
 
     // Determinar o sucesso com base na presença do token e na mensagem

@@ -6,13 +6,13 @@ class AuthProvider extends InheritedWidget {
 
   AuthProvider({
     Key? key,
+    required this.authService,
     required Widget child,
-  }) : 
-    authService = AuthService(),
-    super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   static AuthProvider of(BuildContext context) {
-    final AuthProvider? result = context.dependOnInheritedWidgetOfExactType<AuthProvider>();
+    final AuthProvider? result =
+        context.dependOnInheritedWidgetOfExactType<AuthProvider>();
     assert(result != null, 'Nenhum AuthProvider encontrado no contexto');
     return result!;
   }
@@ -22,4 +22,3 @@ class AuthProvider extends InheritedWidget {
     return false;
   }
 }
-

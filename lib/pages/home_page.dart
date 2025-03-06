@@ -1,8 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:controle_gasto_pessoal/services/auth_service.dart';
+import 'package:flutter/foundation.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   final currencyFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
+  String userName = 'Usuário';
+
+  // Instância do AuthService (singleton)
+  final AuthService _authService = AuthService();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      // Obter os dados do usuário
+      final userData = await _authService.getUserData();
+
+      // Adicionar log para depuração
+      if (kDebugMode) {
+        print('Dados do usuário na HomePage: $userData');
+      }
+
+      // Verificar diferentes possibilidades para o nome do usuário
+      String name = 'Usuário';
+      if (userData != null) {
+        if (userData.containsKey('nome')) {
+          name = userData['nome'] ?? 'Usuário';
+        } else if (userData.containsKey('name')) {
+          name = userData['name'] ?? 'Usuário';
+        } else if (userData.containsKey('Nome')) {
+          name = userData['Nome'] ?? 'Usuário';
+        }
+
+        if (kDebugMode) {
+          print('Nome do usuário encontrado: $name');
+        }
+
+        setState(() {
+          userName = name;
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Erro ao carregar dados do usuário: $e');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +98,7 @@ class HomePage extends StatelessWidget {
           Expanded(
             child: Column(
               children: [
-                // Barra superior com ícone de notificação e menu hamburguer para mobile
+                // Barra superior com nome do usuário, ícone de logout e notificação
                 Container(
                   height: 60,
                   color: Color(0xFF111827),
@@ -60,7 +113,61 @@ class HomePage extends StatelessWidget {
                           },
                         ),
                       Spacer(),
+                      // Nome do usuário
+                      Text(
+                        'Olá, $userName',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      // Ícone de notificação
                       Icon(Icons.notifications, color: Colors.white),
+                      SizedBox(width: 16),
+                      // Ícone de logout
+                      IconButton(
+                        icon: Icon(Icons.exit_to_app, color: Colors.white),
+                        tooltip: 'Sair',
+                        onPressed: () {
+                          // Mostrar diálogo de confirmação
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              backgroundColor: Color(0xFF374151),
+                              title: Text('Sair',
+                                  style: TextStyle(color: Colors.white)),
+                              content: Text(
+                                'Tem certeza que deseja sair?',
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                              actions: [
+                                TextButton(
+                                  child: Text('Cancelar'),
+                                  onPressed: () => Navigator.of(context).pop(),
+                                ),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                  ),
+                                  child: Text('Sair'),
+                                  onPressed: () async {
+                                    // Fazer logout
+                                    await _authService.logout();
+
+                                    // Navegar para a tela de login
+                                    Navigator.of(context)
+                                        .pushNamedAndRemoveUntil(
+                                      '/login',
+                                      (route) => false,
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                       SizedBox(width: 16),
                     ],
                   ),
@@ -137,10 +244,24 @@ class HomePage extends StatelessWidget {
                   children: [
                     DrawerHeader(
                       decoration: BoxDecoration(color: Color(0xFF1F2937)),
-                      child: Icon(
-                        Icons.account_balance_wallet,
-                        color: Colors.white,
-                        size: 48,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.account_balance_wallet,
+                            color: Colors.white,
+                            size: 48,
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'Olá, $userName',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     _buildMenuItem(context, 'Bancos', Icons.account_balance,
@@ -155,6 +276,52 @@ class HomePage extends StatelessWidget {
                         context, 'Poupança', Icons.savings, '/savings'),
                     _buildMenuItem(
                         context, 'Categorias', Icons.category, '/categories'),
+                    Divider(color: Colors.white24),
+                    ListTile(
+                      leading: Icon(Icons.exit_to_app, color: Colors.white),
+                      title:
+                          Text('Sair', style: TextStyle(color: Colors.white)),
+                      onTap: () {
+                        // Fechar o drawer
+                        Navigator.of(context).pop();
+
+                        // Mostrar diálogo de confirmação
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            backgroundColor: Color(0xFF374151),
+                            title: Text('Sair',
+                                style: TextStyle(color: Colors.white)),
+                            content: Text(
+                              'Tem certeza que deseja sair?',
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                            actions: [
+                              TextButton(
+                                child: Text('Cancelar'),
+                                onPressed: () => Navigator.of(context).pop(),
+                              ),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                ),
+                                child: Text('Sair'),
+                                onPressed: () async {
+                                  // Fazer logout
+                                  await _authService.logout();
+
+                                  // Navegar para a tela de login
+                                  Navigator.of(context).pushNamedAndRemoveUntil(
+                                    '/login',
+                                    (route) => false,
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -194,7 +361,7 @@ class HomePage extends StatelessWidget {
               FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
-                  title == 'Clientes'
+                  title == 'Empresas'
                       ? value.toStringAsFixed(0)
                       : currencyFormat.format(value),
                   style: TextStyle(
