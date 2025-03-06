@@ -1,8 +1,20 @@
-2025/03/06-01:23:46.171 4140 Reusing MANIFEST C:\Users\Kleber\AppData\Local\Temp\flutter_tools.1a7054ac\flutter_tools_chrome_device.1fa2ad1b\Default\shared_proto_db/MANIFEST-000001
-2025/03/06-01:23:46.172 4140 Recovering log #16
-2025/03/06-01:23:46.174 4140 Reusing old log C:\Users\Kleber\AppData\Local\Temp\flutter_tools.1a7054ac\flutter_tools_chrome_device.1fa2ad1b\Default\shared_proto_db/000016.log 
-2025/03/06-01:23:46.175 4140 Delete type=0 #3
-2025/03/06-01:23:46.175 4140 Delete type=0 #4
-2025/03/06-01:23:46.175 4140 Delete type=0 #7
-2025/03/06-01:23:46.175 4140 Delete type=0 #10
-2025/03/06-01:23:46.175 4140 Delete type=0 #13
+2025/03/06-01:26:08.054 21cc Reusing MANIFEST C:\Users\Kleber\AppData\Local\Temp\flutter_tools.490ff3ea\flutter_tools_chrome_device.79b541b\Default\shared_proto_db/MANIFEST-000001
+2025/03/06-01:26:08.055 21cc Recovering log #16
+2025/03/06-01:26:08.057 21cc Reusing old log C:\Users\Kleber\AppData\Local\Temp\flutter_tools.490ff3ea\flutter_tools_chrome_device.79b541b\Default\shared_proto_db/000016.log 
+2025/03/06-01:26:08.058 21cc Delete type=0 #3
+2025/03/06-01:26:08.058 21cc Delete type=0 #4
+2025/03/06-01:26:08.059 21cc Delete type=0 #7
+2025/03/06-01:26:08.059 21cc Delete type=0 #10
+2025/03/06-01:26:08.059 21cc Delete type=0 #13
+2025/03/06-01:26:29.839 21cc Level-0 table #20: started
+2025/03/06-01:26:29.843 21cc Level-0 table #20: 136581 bytes OK
+2025/03/06-01:26:29.845 21cc Delete type=0 #16
+2025/03/06-01:26:29.845 21cc Compacting 4@0 + 1@1 files
+2025/03/06-01:26:29.850 21cc Generated table #21@0: 840 keys, 74840 bytes
+2025/03/06-01:26:29.850 21cc Compacted 4@0 + 1@1 files => 74840 bytes
+2025/03/06-01:26:29.851 21cc compacted to: files[ 0 1 1 0 0 0 0 ]
+2025/03/06-01:26:29.851 21cc Delete type=2 #8
+2025/03/06-01:26:29.851 21cc Delete type=2 #11
+2025/03/06-01:26:29.851 21cc Delete type=2 #14
+2025/03/06-01:26:29.851 21cc Delete type=2 #17
+2025/03/06-01:26:29.851 21cc Delete type=2 #20
