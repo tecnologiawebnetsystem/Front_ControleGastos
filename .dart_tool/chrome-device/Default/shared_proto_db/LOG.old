@@ -1,16 +1,30 @@
-2025/03/06-03:25:53.755 196c Reusing MANIFEST C:\Users\Kleber\AppData\Local\Temp\flutter_tools.7f969439\flutter_tools_chrome_device.20867851\Default\shared_proto_db/MANIFEST-000001
-2025/03/06-03:25:53.757 196c Recovering log #19
-2025/03/06-03:25:53.759 196c Reusing old log C:\Users\Kleber\AppData\Local\Temp\flutter_tools.7f969439\flutter_tools_chrome_device.20867851\Default\shared_proto_db/000019.log 
-2025/03/06-03:25:53.760 196c Delete type=0 #3
-2025/03/06-03:25:53.760 196c Delete type=0 #4
-2025/03/06-03:25:53.760 196c Delete type=0 #7
-2025/03/06-03:25:53.760 196c Delete type=2 #8
-2025/03/06-03:25:53.760 196c Delete type=0 #10
-2025/03/06-03:25:53.760 196c Delete type=2 #11
-2025/03/06-03:25:53.760 196c Delete type=0 #13
-2025/03/06-03:25:53.760 196c Delete type=2 #14
-2025/03/06-03:25:53.761 196c Delete type=0 #16
-2025/03/06-03:25:53.761 196c Delete type=2 #17
-2025/03/06-03:25:53.774 3d70 Level-0 table #24: started
-2025/03/06-03:25:53.783 3d70 Level-0 table #24: 133836 bytes OK
-2025/03/06-03:25:53.784 3d70 Delete type=0 #19
+2025/03/09-02:11:18.640 c2c Reusing MANIFEST C:\Users\Kleber\AppData\Local\Temp\flutter_tools.f59e9784\flutter_tools_chrome_device.bd45f76a\Default\shared_proto_db/MANIFEST-000001
+2025/03/09-02:11:18.642 c2c Recovering log #49
+2025/03/09-02:11:18.645 c2c Reusing old log C:\Users\Kleber\AppData\Local\Temp\flutter_tools.f59e9784\flutter_tools_chrome_device.bd45f76a\Default\shared_proto_db/000049.log 
+2025/03/09-02:11:18.646 c2c Delete type=0 #3
+2025/03/09-02:11:18.646 c2c Delete type=0 #4
+2025/03/09-02:11:18.647 c2c Delete type=0 #7
+2025/03/09-02:11:18.647 c2c Delete type=2 #8
+2025/03/09-02:11:18.647 c2c Delete type=0 #10
+2025/03/09-02:11:18.647 c2c Delete type=2 #11
+2025/03/09-02:11:18.647 c2c Delete type=0 #13
+2025/03/09-02:11:18.647 c2c Delete type=2 #14
+2025/03/09-02:11:18.648 c2c Delete type=0 #16
+2025/03/09-02:11:18.648 c2c Delete type=2 #17
+2025/03/09-02:11:18.648 c2c Delete type=0 #19
+2025/03/09-02:11:18.648 c2c Delete type=2 #21
+2025/03/09-02:11:18.648 c2c Delete type=0 #23
+2025/03/09-02:11:18.648 c2c Delete type=2 #24
+2025/03/09-02:11:18.648 c2c Delete type=0 #26
+2025/03/09-02:11:18.648 c2c Delete type=2 #27
+2025/03/09-02:11:18.649 c2c Delete type=0 #29
+2025/03/09-02:11:18.649 c2c Delete type=2 #30
+2025/03/09-02:11:18.649 c2c Delete type=0 #32
+2025/03/09-02:11:18.649 c2c Delete type=2 #34
+2025/03/09-02:11:18.649 c2c Delete type=0 #36
+2025/03/09-02:11:18.649 c2c Delete type=2 #37
+2025/03/09-02:11:18.649 c2c Delete type=0 #39
+2025/03/09-02:11:18.649 c2c Delete type=2 #40
+2025/03/09-02:11:18.649 c2c Delete type=0 #42
+2025/03/09-02:11:18.649 c2c Delete type=2 #43
+2025/03/09-02:11:18.649 c2c Delete type=0 #45

@@ -8,6 +8,10 @@ import 'package:controle_gasto_pessoal/pages/category_page.dart';
 import 'package:controle_gasto_pessoal/pages/expenses_page.dart';
 import 'package:controle_gasto_pessoal/pages/income_page.dart';
 import 'package:controle_gasto_pessoal/pages/login_page.dart';
+import 'package:controle_gasto_pessoal/pages/contract_type_page.dart';
+import 'package:controle_gasto_pessoal/pages/operation_type_page.dart';
+import 'package:controle_gasto_pessoal/pages/payment_status_page.dart';
+import 'package:controle_gasto_pessoal/pages/admin_page.dart';
 import 'package:controle_gasto_pessoal/config/environment.dart';
 import 'package:flutter/foundation.dart';
 import 'package:controle_gasto_pessoal/services/auth_service.dart';
@@ -60,6 +64,10 @@ class MyApp extends StatelessWidget {
         '/categories': (context) => CategoryPage(),
         '/expenses': (context) => ExpensesPage(),
         '/income': (context) => IncomePage(),
+        '/contract_types': (context) => ContractTypePage(),
+        '/operation_types': (context) => OperationTypePage(),
+        '/payment_status': (context) => PaymentStatusPage(),
+        '/admin': (context) => AdminPage(),
       },
     );
   }

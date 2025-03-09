@@ -34,41 +34,37 @@ class AuthResponse {
 
       // Adicionar log para verificar os dados do usuário
       if (kDebugMode) {
-        print('Dados do usuário extraídos: $userData');
+        print('Dados do usuário extraídos de data: $userData');
       }
     } else if (json['user'] != null && json['user'] is Map) {
       userData = Map<String, dynamic>.from(json['user']);
 
       // Adicionar log para verificar os dados do usuário
       if (kDebugMode) {
-        print('Dados do usuário extraídos (de user): $userData');
+        print('Dados do usuário extraídos de user: $userData');
+      }
+    } else if (json['usuario'] != null && json['usuario'] is Map) {
+      userData = Map<String, dynamic>.from(json['usuario']);
+
+      // Adicionar log para verificar os dados do usuário
+      if (kDebugMode) {
+        print('Dados do usuário extraídos de usuario: $userData');
       }
     }
 
-    // Verificar se há campos específicos do banco de dados
-    if (userData != null) {
-      // Verificar e mapear campos específicos do banco de dados
-      if (userData.containsKey('UsuarioID')) {
-        userData['id'] = userData['UsuarioID'];
-      }
-      if (userData.containsKey('Nome')) {
-        userData['nome'] = userData['Nome'];
-      }
-      if (userData.containsKey('Email')) {
-        userData['email'] = userData['Email'];
-      }
-      if (userData.containsKey('Login')) {
-        userData['login'] = userData['Login'];
-      }
-      if (userData.containsKey('Adm')) {
-        userData['adm'] = userData['Adm'];
-      }
-      if (userData.containsKey('Ativo')) {
-        userData['ativo'] = userData['Ativo'];
-      }
+    // Se não encontramos dados do usuário, mas temos um token, criar um objeto básico
+    if (userData == null && token != null) {
+      userData = {
+        'id': 0,
+        'nome': 'Usuário',
+        'email': '',
+        'login': '',
+        'adm': false,
+        'ativo': true,
+      };
 
       if (kDebugMode) {
-        print('Dados do usuário normalizados: $userData');
+        print('Dados do usuário criados manualmente: $userData');
       }
     }
 
@@ -77,7 +73,7 @@ class AuthResponse {
     bool isSuccess = json['success'] ?? false;
     if (!isSuccess &&
         token != null &&
-        json['message'] == 'Login bem-sucedido') {
+        (json['message'] == 'Login bem-sucedido' || json['message'] == null)) {
       isSuccess = true;
     }
 

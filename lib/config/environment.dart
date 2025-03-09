@@ -10,8 +10,7 @@ class AppConfig {
   // URLs da API para cada ambiente
   static const Map<Environment, String> _apiBaseUrls = {
     // Use o IP da sua máquina na rede local em vez de localhost
-    Environment.development:
-        'http://192.168.18.10:3000/api', // Substitua X.Y pelo seu IP real
+    Environment.development: 'http://192.168.18.10:3000/api',
     Environment.production: 'https://controle-gastos-api.onrender.com/api',
   };
 

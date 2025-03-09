@@ -135,11 +135,27 @@ class AuthService {
     try {
       final authRequest = AuthRequest(email: email, password: password);
 
+      // Log da requisição
+      if (kDebugMode) {
+        print(
+            'Enviando requisição de login: ${json.encode(authRequest.toJson())}');
+      }
+
       final response =
           await _apiService.post('auth/login', authRequest.toJson());
 
+      // Log da resposta bruta
       if (kDebugMode) {
         print('Resposta bruta do servidor: $response');
+        if (response is Map) {
+          print('Campos na resposta: ${response.keys.toList()}');
+          if (response['data'] != null && response['data'] is Map) {
+            print('Campos em data: ${(response['data'] as Map).keys.toList()}');
+          }
+          if (response['user'] != null && response['user'] is Map) {
+            print('Campos em user: ${(response['user'] as Map).keys.toList()}');
+          }
+        }
       }
 
       // Verificar se a resposta é válida
@@ -183,15 +199,22 @@ class AuthService {
           // Normalizar os nomes dos campos para garantir consistência
           _normalizeUserData();
 
+          // Adicionar campos que podem estar faltando
+          _ensureRequiredFields(email);
+
           if (kDebugMode) {
             print('Dados do usuário definidos: $_userData');
           }
         } else {
-          // Se não houver dados do usuário, criar um objeto básico
+          // Se não houver dados do usuário, criar um objeto completo
           _userData = {
             'id': 0,
+            'usuarioid': 0,
             'nome': 'Usuário',
             'email': email,
+            'login': email.split('@')[0],
+            'adm': false,
+            'ativo': true,
           };
 
           if (kDebugMode) {
@@ -208,12 +231,16 @@ class AuthService {
         // Exibir informações detalhadas no log
         if (kDebugMode && _userData != null) {
           print('=== DADOS DO USUÁRIO LOGADO ===');
-          print('Usuario ID: ${_userData!['id'] ?? 'N/A'}');
-          print('Nome: ${_userData!['nome'] ?? 'N/A'}');
-          print('E-mail: ${_userData!['email'] ?? 'N/A'}');
-          print('Login: ${_userData!['login'] ?? 'N/A'}');
-          print('Adm: ${_userData!['adm'] ?? 'N/A'}');
-          print('Ativo: ${_userData!['ativo'] ?? 'N/A'}');
+          print(
+              'Usuario ID: ${_userData!['id'] ?? _userData!['usuarioid'] ?? 'N/A'}');
+          print('Nome: ${_userData!['nome'] ?? _userData!['Nome'] ?? 'N/A'}');
+          print(
+              'E-mail: ${_userData!['email'] ?? _userData!['Email'] ?? 'N/A'}');
+          print(
+              'Login: ${_userData!['login'] ?? _userData!['Login'] ?? 'N/A'}');
+          print('Adm: ${_userData!['adm'] ?? _userData!['Adm'] ?? 'N/A'}');
+          print(
+              'Ativo: ${_userData!['ativo'] ?? _userData!['Ativo'] ?? 'N/A'}');
           print('==============================');
         }
       }
@@ -227,6 +254,33 @@ class AuthService {
         success: false,
         message: 'Erro ao fazer login: $e',
       );
+    }
+  }
+
+  // Método para garantir que todos os campos necessários estejam presentes
+  void _ensureRequiredFields(String email) {
+    if (_userData == null) return;
+
+    // Lista de campos obrigatórios
+    final requiredFields = {
+      'id': 0,
+      'usuarioid': _userData!['id'] ?? 0,
+      'nome': 'Usuário',
+      'email': email,
+      'login': email.split('@')[0],
+      'adm': false,
+      'ativo': true,
+    };
+
+    // Adicionar campos que estão faltando
+    requiredFields.forEach((key, defaultValue) {
+      if (!_userData!.containsKey(key)) {
+        _userData![key] = defaultValue;
+      }
+    });
+
+    if (kDebugMode) {
+      print('Campos obrigatórios garantidos: $_userData');
     }
   }
 
@@ -366,6 +420,9 @@ class AuthService {
     // Normalizar os dados do usuário
     _normalizeUserData();
 
+    // Garantir que todos os campos necessários estejam presentes
+    _ensureRequiredFields(userData['email'] ?? '');
+
     if (kDebugMode) {
       print('Dados do usuário definidos manualmente: $_userData');
     }
@@ -375,12 +432,13 @@ class AuthService {
     // Exibir informações detalhadas no log
     if (kDebugMode) {
       print('=== DADOS DO USUÁRIO DEFINIDOS ===');
-      print('Usuario ID: ${userData['id'] ?? userData['usuarioid'] ?? 'N/A'}');
-      print('Nome: ${userData['nome'] ?? userData['Nome'] ?? 'N/A'}');
-      print('E-mail: ${userData['email'] ?? userData['Email'] ?? 'N/A'}');
-      print('Login: ${userData['login'] ?? userData['Login'] ?? 'N/A'}');
-      print('Adm: ${userData['adm'] ?? userData['Adm'] ?? 'N/A'}');
-      print('Ativo: ${userData['ativo'] ?? userData['Ativo'] ?? 'N/A'}');
+      print(
+          'Usuario ID: ${_userData!['id'] ?? _userData!['usuarioid'] ?? 'N/A'}');
+      print('Nome: ${_userData!['nome'] ?? _userData!['Nome'] ?? 'N/A'}');
+      print('E-mail: ${_userData!['email'] ?? _userData!['Email'] ?? 'N/A'}');
+      print('Login: ${_userData!['login'] ?? _userData!['Login'] ?? 'N/A'}');
+      print('Adm: ${_userData!['adm'] ?? _userData!['Adm'] ?? 'N/A'}');
+      print('Ativo: ${_userData!['ativo'] ?? _userData!['Ativo'] ?? 'N/A'}');
       print('==============================');
     }
   }
@@ -396,5 +454,59 @@ class AuthService {
 
     // Limpar dados do armazenamento persistente
     await _saveData();
+  }
+
+  // Método para buscar dados do usuário do servidor
+  Future<bool> fetchUserData() async {
+    if (_token == null) {
+      if (kDebugMode) {
+        print('Não é possível buscar dados do usuário sem token');
+      }
+      return false;
+    }
+
+    try {
+      // Fazer uma requisição para obter os dados do usuário
+      final response = await _apiService.get('usuarios/me');
+
+      if (kDebugMode) {
+        print('Resposta da busca de dados do usuário: $response');
+      }
+
+      if (response != null && (response is Map)) {
+        Map<String, dynamic> userData;
+
+        if (response.containsKey('data')) {
+          userData = Map<String, dynamic>.from(response['data']);
+        } else {
+          userData = Map<String, dynamic>.from(response);
+        }
+
+        // Atualizar os dados do usuário
+        _userData = userData;
+
+        // Normalizar os nomes dos campos
+        _normalizeUserData();
+
+        // Garantir que todos os campos necessários estejam presentes
+        _ensureRequiredFields(_userData?['email'] ?? '');
+
+        // Salvar os dados atualizados
+        await _saveData();
+
+        if (kDebugMode) {
+          print('Dados do usuário atualizados: $_userData');
+        }
+
+        return true;
+      }
+
+      return false;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Erro ao buscar dados do usuário: $e');
+      }
+      return false;
+    }
   }
 }

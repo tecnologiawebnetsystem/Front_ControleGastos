@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:controle_gasto_pessoal/services/auth_service.dart';
 import 'package:flutter/foundation.dart';
+import 'package:controle_gasto_pessoal/config/environment.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -92,19 +93,12 @@ class _LoginPageState extends State<LoginPage> {
     // Definir dados do usuário diretamente com todos os campos solicitados
     await _authService.setUserData({
       'id': 999,
-      'usuarioid': 999, // Adicionado para simular o campo do banco de dados
+      'usuarioid': 999,
       'nome': 'Usuário de Teste',
-      'Nome':
-          'Usuário de Teste', // Adicionado para simular o campo do banco de dados
       'email': 'teste@exemplo.com',
-      'Email':
-          'teste@exemplo.com', // Adicionado para simular o campo do banco de dados
       'login': 'teste',
-      'Login': 'teste', // Adicionado para simular o campo do banco de dados
       'adm': true,
-      'Adm': true, // Adicionado para simular o campo do banco de dados
       'ativo': true,
-      'Ativo': true, // Adicionado para simular o campo do banco de dados
     });
 
     if (kDebugMode) {
@@ -119,8 +113,50 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Determine environment
+    final isProduction = AppConfig.currentEnvironment == Environment.production;
+    final environmentName = isProduction ? 'PRODUÇÃO' : 'DESENVOLVIMENTO';
+    final environmentColor = isProduction ? Colors.red : Colors.green;
+
     return Scaffold(
       backgroundColor: Color(0xFF1F2937),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: environmentColor.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: environmentColor),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isProduction ? Icons.cloud : Icons.computer,
+                    color: environmentColor,
+                    size: 16,
+                  ),
+                  SizedBox(width: 6),
+                  Text(
+                    'API: $environmentName',
+                    style: TextStyle(
+                      color: environmentColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        centerTitle: true,
+      ),
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
@@ -305,18 +341,38 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ),
                             ),
-                            // Botão de login de teste (apenas para desenvolvimento)
-                            if (kDebugMode)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 16.0),
-                                child: TextButton(
-                                  onPressed: _testLogin,
-                                  child: Text(
-                                    'Entrar sem autenticação (apenas para testes)',
-                                    style: TextStyle(color: Colors.blue[300]),
+                            // Environment information
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16.0),
+                              child: Column(
+                                children: [
+                                  Divider(color: Colors.white24),
+                                  SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        AppConfig.isProduction
+                                            ? Icons.cloud
+                                            : Icons.computer,
+                                        color: AppConfig.isProduction
+                                            ? Colors.red[300]
+                                            : Colors.green[300],
+                                        size: 14,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Conectando a: ${AppConfig.apiBaseUrl}',
+                                        style: TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
+                                ],
                               ),
+                            ),
                           ],
                         ),
                       ),

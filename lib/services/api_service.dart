@@ -20,13 +20,27 @@ class ApiService {
   // Setter para o token de autenticação
   set authToken(String? token) {
     _authToken = token;
+    if (kDebugMode) {
+      print(
+          'Token definido no ApiService: ${token != null ? token.substring(0, min(10, token.length)) + '...' : 'null'}');
+    }
   }
+
+  // Getter para o token de autenticação
+  String? get authToken => _authToken;
 
   // Método para obter os headers com o token de autenticação (se disponível)
   Map<String, String> get _getHeaders {
     final headers = Map<String, String>.from(_headers);
     if (_authToken != null) {
       headers['Authorization'] = 'Bearer $_authToken';
+      if (kDebugMode) {
+        print('Adicionando token de autorização ao header');
+      }
+    } else {
+      if (kDebugMode) {
+        print('AVISO: Token de autorização não disponível');
+      }
     }
     return headers;
   }
@@ -41,10 +55,17 @@ class ApiService {
         print('Headers: $_getHeaders');
       }
 
-      final response = await http.get(
+      final response = await http
+          .get(
         url,
         headers: _getHeaders,
-      );
+      )
+          .timeout(Duration(seconds: 30), onTimeout: () {
+        if (kDebugMode) {
+          print('Timeout na requisição GET para $url');
+        }
+        throw TimeoutException('A requisição excedeu o tempo limite');
+      });
 
       return _processResponse(response);
     } catch (e) {
@@ -97,11 +118,18 @@ class ApiService {
         print('Data: $body');
       }
 
-      final response = await http.put(
+      final response = await http
+          .put(
         url,
         headers: _getHeaders,
         body: body,
-      );
+      )
+          .timeout(Duration(seconds: 30), onTimeout: () {
+        if (kDebugMode) {
+          print('Timeout na requisição PUT para $url');
+        }
+        throw TimeoutException('A requisição excedeu o tempo limite');
+      });
 
       return _processResponse(response);
     } catch (e) {
@@ -120,10 +148,17 @@ class ApiService {
         print('Headers: $_getHeaders');
       }
 
-      final response = await http.delete(
+      final response = await http
+          .delete(
         url,
         headers: _getHeaders,
-      );
+      )
+          .timeout(Duration(seconds: 30), onTimeout: () {
+        if (kDebugMode) {
+          print('Timeout na requisição DELETE para $url');
+        }
+        throw TimeoutException('A requisição excedeu o tempo limite');
+      });
 
       return _processResponse(response);
     } catch (e) {
@@ -199,6 +234,11 @@ class ApiService {
         print('Stack trace: ${error.stackTrace}');
       }
     }
+  }
+
+  // Função auxiliar para limitar o tamanho de uma string
+  int min(int a, int b) {
+    return a < b ? a : b;
   }
 }
 
