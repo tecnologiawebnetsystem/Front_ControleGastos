@@ -13,6 +13,7 @@ dependencies:
   shared_preferences: ^2.0.15
   cupertino_icons: ^1.0.2
   provider: ^6.0.5
+  printing: ^5.11.1  # Adicionado o pacote printing
 
 dev_dependencies:
   flutter_test:
@@ -21,4 +22,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
 
