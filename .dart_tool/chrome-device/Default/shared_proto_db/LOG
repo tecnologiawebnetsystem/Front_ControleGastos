@@ -1,30 +1,44 @@
-2025/03/09-02:23:58.354 4b8 Reusing MANIFEST C:\Users\Kleber\AppData\Local\Temp\flutter_tools.b1381f66\flutter_tools_chrome_device.8afc553d\Default\shared_proto_db/MANIFEST-000001
-2025/03/09-02:23:58.355 4b8 Recovering log #49
-2025/03/09-02:23:58.357 4b8 Reusing old log C:\Users\Kleber\AppData\Local\Temp\flutter_tools.b1381f66\flutter_tools_chrome_device.8afc553d\Default\shared_proto_db/000049.log 
-2025/03/09-02:23:58.358 4b8 Delete type=0 #3
-2025/03/09-02:23:58.358 4b8 Delete type=0 #4
-2025/03/09-02:23:58.359 4b8 Delete type=0 #7
-2025/03/09-02:23:58.359 4b8 Delete type=2 #8
-2025/03/09-02:23:58.359 4b8 Delete type=0 #10
-2025/03/09-02:23:58.359 4b8 Delete type=2 #11
-2025/03/09-02:23:58.359 4b8 Delete type=0 #13
-2025/03/09-02:23:58.359 4b8 Delete type=2 #14
-2025/03/09-02:23:58.359 4b8 Delete type=0 #16
-2025/03/09-02:23:58.360 4b8 Delete type=2 #17
-2025/03/09-02:23:58.360 4b8 Delete type=0 #19
-2025/03/09-02:23:58.360 4b8 Delete type=2 #21
-2025/03/09-02:23:58.360 4b8 Delete type=0 #23
-2025/03/09-02:23:58.360 4b8 Delete type=2 #24
-2025/03/09-02:23:58.360 4b8 Delete type=0 #26
-2025/03/09-02:23:58.360 4b8 Delete type=2 #27
-2025/03/09-02:23:58.360 4b8 Delete type=0 #29
-2025/03/09-02:23:58.360 4b8 Delete type=2 #30
-2025/03/09-02:23:58.360 4b8 Delete type=0 #32
-2025/03/09-02:23:58.360 4b8 Delete type=2 #34
-2025/03/09-02:23:58.361 4b8 Delete type=0 #36
-2025/03/09-02:23:58.361 4b8 Delete type=2 #37
-2025/03/09-02:23:58.361 4b8 Delete type=0 #39
-2025/03/09-02:23:58.361 4b8 Delete type=2 #40
-2025/03/09-02:23:58.361 4b8 Delete type=0 #42
-2025/03/09-02:23:58.361 4b8 Delete type=2 #43
-2025/03/09-02:23:58.361 4b8 Delete type=0 #45
+2025/03/10-02:05:30.722 3ea8 Reusing MANIFEST C:\Users\Kleber\AppData\Local\Temp\flutter_tools.c52fe78d\flutter_tools_chrome_device.81a9a5f2\Default\shared_proto_db/MANIFEST-000001
+2025/03/10-02:05:30.723 3ea8 Recovering log #55
+2025/03/10-02:05:30.726 3ea8 Reusing old log C:\Users\Kleber\AppData\Local\Temp\flutter_tools.c52fe78d\flutter_tools_chrome_device.81a9a5f2\Default\shared_proto_db/000055.log 
+2025/03/10-02:05:30.726 3ea8 Delete type=0 #3
+2025/03/10-02:05:30.727 3ea8 Delete type=0 #4
+2025/03/10-02:05:30.727 3ea8 Delete type=0 #7
+2025/03/10-02:05:30.727 3ea8 Delete type=2 #8
+2025/03/10-02:05:30.727 3ea8 Delete type=0 #10
+2025/03/10-02:05:30.727 3ea8 Delete type=2 #11
+2025/03/10-02:05:30.727 3ea8 Delete type=0 #13
+2025/03/10-02:05:30.728 3ea8 Delete type=2 #14
+2025/03/10-02:05:30.728 3ea8 Delete type=0 #16
+2025/03/10-02:05:30.729 3ea8 Delete type=2 #17
+2025/03/10-02:05:30.729 3ea8 Delete type=0 #19
+2025/03/10-02:05:30.729 3ea8 Delete type=2 #21
+2025/03/10-02:05:30.729 3ea8 Delete type=0 #23
+2025/03/10-02:05:30.729 3ea8 Delete type=2 #24
+2025/03/10-02:05:30.729 3ea8 Delete type=0 #26
+2025/03/10-02:05:30.730 3ea8 Delete type=2 #27
+2025/03/10-02:05:30.730 3ea8 Delete type=0 #29
+2025/03/10-02:05:30.730 3ea8 Delete type=2 #30
+2025/03/10-02:05:30.730 3ea8 Delete type=0 #32
+2025/03/10-02:05:30.730 3ea8 Delete type=2 #34
+2025/03/10-02:05:30.730 3ea8 Delete type=0 #36
+2025/03/10-02:05:30.731 3ea8 Delete type=2 #37
+2025/03/10-02:05:30.731 3ea8 Delete type=0 #39
+2025/03/10-02:05:30.731 3ea8 Delete type=2 #40
+2025/03/10-02:05:30.731 3ea8 Delete type=0 #42
+2025/03/10-02:05:30.731 3ea8 Delete type=2 #43
+2025/03/10-02:05:30.731 3ea8 Delete type=0 #45
+2025/03/10-02:05:30.732 3ea8 Delete type=0 #49
+2025/03/10-02:05:30.732 3ea8 Delete type=0 #52
+2025/03/10-02:05:50.719 3ea8 Level-0 table #59: started
+2025/03/10-02:05:50.724 3ea8 Level-0 table #59: 135563 bytes OK
+2025/03/10-02:05:50.726 3ea8 Delete type=0 #55
+2025/03/10-02:05:50.727 3ea8 Compacting 4@0 + 1@1 files
+2025/03/10-02:05:50.734 3ea8 Generated table #60@0: 2655 keys, 374130 bytes
+2025/03/10-02:05:50.734 3ea8 Compacted 4@0 + 1@1 files => 374130 bytes
+2025/03/10-02:05:50.735 3ea8 compacted to: files[ 0 1 1 0 0 0 0 ]
+2025/03/10-02:05:50.736 3ea8 Delete type=2 #47
+2025/03/10-02:05:50.736 3ea8 Delete type=2 #50
+2025/03/10-02:05:50.736 3ea8 Delete type=2 #53
+2025/03/10-02:05:50.736 3ea8 Delete type=2 #56
+2025/03/10-02:05:50.736 3ea8 Delete type=2 #59

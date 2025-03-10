@@ -4,6 +4,8 @@ import 'package:controle_gasto_pessoal/services/auth_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:controle_gasto_pessoal/components/finance_chat_box.dart';
 import 'dart:math' show sin;
+import 'package:controle_gasto_pessoal/services/empresa_service.dart';
+import 'package:controle_gasto_pessoal/models/empresa_model.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -13,6 +15,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final currencyFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
   String userName = 'Usuário';
+  int empresasAtivas = 0; // Contagem de empresas ativas
+  double totalSalarios = 0.0; // Nova variável para armazenar a soma dos valores
 
   // Controle para o menu de administração expandido/recolhido
   bool _isAdminMenuExpanded = false;
@@ -24,6 +28,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _loadUserData();
+    _loadEmpresasAtivas(); // Adicione esta linha
   }
 
   Future<void> _loadUserData() async {
@@ -65,8 +70,129 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _loadEmpresasAtivas() async {
+    if (kDebugMode) {
+      print('Iniciando carregamento de empresas ativas...');
+    }
+
+    try {
+      // Obter o token do usuário
+      final token = await _authService.getToken();
+      if (token == null) {
+        if (kDebugMode) {
+          print('Token não encontrado');
+        }
+        return;
+      }
+
+      if (kDebugMode) {
+        print('Token obtido com sucesso');
+      }
+
+      // Obter o ID do usuário
+      final userData = await _authService.getUserData();
+      if (userData == null) {
+        if (kDebugMode) {
+          print('Dados do usuário não encontrados');
+        }
+        return;
+      }
+
+      // Verificar diferentes possibilidades para o ID do usuário
+      final usuarioId = userData['usuarioId'] ??
+          userData['UsuarioId'] ??
+          userData['id'] ??
+          userData['Id'] ??
+          0;
+
+      if (kDebugMode) {
+        print('ID do usuário encontrado: $usuarioId');
+        print('Dados completos do usuário: $userData');
+      }
+
+      if (usuarioId == 0) {
+        if (kDebugMode) {
+          print('ID do usuário não encontrado ou é zero');
+        }
+        return;
+      }
+
+      // Criar instância do serviço de empresas
+      final empresaService = EmpresaService(token: token);
+
+      // Buscar todas as empresas do usuário
+      if (kDebugMode) {
+        print('Buscando empresas para o usuário ID: $usuarioId');
+      }
+
+      final empresas = await empresaService.getEmpresas(usuarioId);
+
+      if (kDebugMode) {
+        print('Total de empresas encontradas: ${empresas.length}');
+        print(
+            'Empresas: ${empresas.map((e) => '${e.nome} (Ativo: ${e.ativo})').join(', ')}');
+      }
+
+      // Filtrar apenas as empresas ativas
+      final ativas =
+          empresas.where((empresa) => empresa.ativo == true).toList();
+
+      // Calcular a soma dos valores das empresas ativas
+      double somaValores = 0.0;
+      for (var empresa in ativas) {
+        somaValores += empresa.valor;
+        if (kDebugMode) {
+          print(
+              'Adicionando valor ${empresa.valor} da empresa ${empresa.nome} à soma');
+        }
+      }
+
+      if (kDebugMode) {
+        print('Empresas ativas encontradas: ${ativas.length}');
+        print('Empresas ativas: ${ativas.map((e) => e.nome).join(', ')}');
+        print('Soma total dos valores: $somaValores');
+      }
+
+      // Atualizar o estado
+      setState(() {
+        empresasAtivas = ativas.length;
+        totalSalarios = somaValores;
+      });
+
+      if (kDebugMode) {
+        print(
+            'Estado atualizado: empresasAtivas = $empresasAtivas, totalSalarios = $totalSalarios');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Erro ao carregar empresas ativas: $e');
+        print('Stack trace: ${StackTrace.current}');
+      }
+      // Definir valores padrão em caso de erro
+      setState(() {
+        empresasAtivas = 0;
+        totalSalarios = 0.0;
+      });
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Recarregar dados quando a página se torna visível novamente
+    _loadEmpresasAtivas();
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Forçar carregamento de dados ao construir a página
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Verificar se os dados já foram carregados
+      if (empresasAtivas == 0 && totalSalarios == 0.0) {
+        _loadEmpresasAtivas();
+      }
+    });
+
     return Scaffold(
       backgroundColor: Color(0xFF1F2937),
       body: Stack(
@@ -256,14 +382,19 @@ class _HomePageState extends State<HomePage> {
                                         finalCardWidth, finalCardHeight),
                                     _buildInfoCard(
                                         'Salário',
-                                        7000,
+                                        totalSalarios,
                                         Colors.green,
                                         finalCardWidth,
                                         finalCardHeight),
                                     _buildInfoCard('Crédito', 1000, Colors.teal,
                                         finalCardWidth, finalCardHeight),
-                                    _buildInfoCard('Empresas', 5, Colors.purple,
-                                        finalCardWidth, finalCardHeight),
+                                    _buildInfoCard(
+                                        'Clientes',
+                                        empresasAtivas.toDouble(),
+                                        Colors.purple,
+                                        finalCardWidth,
+                                        finalCardHeight,
+                                        isCount: true),
                                   ],
                                 );
                               },
@@ -426,7 +557,19 @@ class _HomePageState extends State<HomePage> {
         if (kDebugMode) {
           print('Navegando para a rota: $route');
         }
-        Navigator.pushNamed(context, route);
+
+        if (route == '/company_registration') {
+          // Para a página de empresas, usamos pushNamed e atualizamos os dados quando o usuário retornar
+          Navigator.pushNamed(context, route).then((_) {
+            if (kDebugMode) {
+              print('Retornando da página de empresas - atualizando dados');
+            }
+            _loadEmpresasAtivas();
+          });
+        } else {
+          // Para outras rotas, comportamento normal
+          Navigator.pushNamed(context, route);
+        }
       },
     );
   }
@@ -435,16 +578,13 @@ class _HomePageState extends State<HomePage> {
   Widget _buildSubmenuItem(
       BuildContext context, String title, IconData icon, String route) {
     return ListTile(
-      dense: true, // Torna o item mais compacto
+      dense: true,
       contentPadding: EdgeInsets.only(left: 32.0, right: 16.0),
-      leading:
-          Icon(icon, color: Colors.white, size: 18), // Reduz o tamanho do ícone
+      leading: Icon(icon, color: Colors.white, size: 18),
       title: Text(
         title,
-        style: TextStyle(
-            color: Colors.white, fontSize: 13), // Reduz o tamanho da fonte
-        overflow:
-            TextOverflow.ellipsis, // Adiciona ellipsis para texto que não cabe
+        style: TextStyle(color: Colors.white, fontSize: 13),
+        overflow: TextOverflow.ellipsis,
       ),
       onTap: () {
         if (kDebugMode) {
@@ -460,7 +600,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildInfoCard(
-      String title, double value, Color color, double width, double height) {
+      String title, double value, Color color, double width, double height,
+      {bool isCount = false}) {
     return Container(
       width: width,
       height: height,
@@ -481,7 +622,7 @@ class _HomePageState extends State<HomePage> {
               FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
-                  title == 'Empresas'
+                  isCount || title == 'Empresas'
                       ? value.toStringAsFixed(0)
                       : currencyFormat.format(value),
                   style: TextStyle(

@@ -36,7 +36,9 @@ class BancoModel {
   }
 
   Map<String, dynamic> toJson() {
+    // Tentar diferentes formatos de JSON para compatibilidade com a API
     return {
+      // Formato 1: Campos com nomes em camelCase
       'bancoId': bancoId,
       'usuarioId': usuarioId,
       'nome': nome,
@@ -44,6 +46,19 @@ class BancoModel {
       'agencia': agencia,
       'conta': conta,
       'pix': pix,
+
+      // Formato 2: Campos com nomes em PascalCase (adicionados como aliases)
+      'BancoId': bancoId,
+      'UsuarioId': usuarioId,
+      'Nome': nome,
+      'Codigo': codigo,
+      'Agencia': agencia,
+      'Conta': conta,
+      'Pix': pix,
+
+      // Formato 3: Campos com nomes em snake_case (adicionados como aliases)
+      'banco_id': bancoId,
+      'usuario_id': usuarioId,
     };
   }
 }

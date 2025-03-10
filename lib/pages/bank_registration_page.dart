@@ -64,6 +64,39 @@ class _BankRegistrationPageState extends State<BankRegistrationPage> {
     _initializeData();
   }
 
+  void _showSuccessMessage(String message) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  void _showErrorMessage(String message) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  void _resetForm() {
+    setState(() {
+      isEditing = false;
+      editingBancoId = null;
+      selectedBank = null;
+      _agencyController.clear();
+      _accountController.clear();
+      _pixController.clear();
+    });
+  }
+
   Future<void> _initializeData() async {
     try {
       // Obter o token de autenticação
@@ -196,42 +229,24 @@ class _BankRegistrationPageState extends State<BankRegistrationPage> {
     });
 
     try {
-      if (kDebugMode) {
-        print('Carregando bancos para o usuário $_usuarioId');
-      }
+      // Limpar o cache HTTP para garantir dados frescos
+      http.Client().close();
 
-      // Buscar bancos diretamente da API
-      final response = await http.get(
-        Uri.parse('${AppConfig.apiBaseUrl}/bancos'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $_token',
-        },
-      );
+      // Usar o serviço para carregar os bancos
+      final bancos = await _bancoService.getBancos(_usuarioId);
 
       if (kDebugMode) {
-        print('Status code da requisição de bancos: ${response.statusCode}');
-        print('Resposta da requisição de bancos: ${response.body}');
+        print('Bancos carregados: ${bancos.length}');
+        for (var banco in bancos) {
+          print(
+              'Banco: ${banco.bancoId} - ${banco.nome} - ${banco.agencia} - ${banco.conta}');
+        }
       }
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        // Filtra os bancos pelo ID do usuário
-        final bancos = data
-            .map((json) => BancoModel.fromJson(json))
-            .where((banco) => banco.usuarioId == _usuarioId)
-            .toList();
-
-        setState(() {
-          registeredBanks = bancos;
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          registeredBanks = [];
-          isLoading = false;
-        });
-      }
+      setState(() {
+        registeredBanks = bancos;
+        isLoading = false;
+      });
     } catch (e) {
       if (kDebugMode) {
         print('Erro ao carregar bancos: $e');
@@ -241,6 +256,8 @@ class _BankRegistrationPageState extends State<BankRegistrationPage> {
         registeredBanks = [];
         isLoading = false;
       });
+
+      _showErrorMessage('Erro ao carregar bancos: $e');
     }
   }
 
@@ -254,6 +271,10 @@ class _BankRegistrationPageState extends State<BankRegistrationPage> {
 
   void _addOrUpdateBank() async {
     if (_formKey.currentState!.validate() && selectedBank != null) {
+      setState(() {
+        isLoading = true; // Mostrar indicador de carregamento
+      });
+
       final selectedBankInfo =
           bankList.firstWhere((bank) => bank.code == selectedBank);
 
@@ -270,29 +291,27 @@ class _BankRegistrationPageState extends State<BankRegistrationPage> {
             pix: _pixController.text,
           );
 
-          // Fazer requisição PUT diretamente
-          final response = await http.put(
-            Uri.parse(
-                '${AppConfig.apiBaseUrl}/bancos/${bancoToUpdate.bancoId}'),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $_token',
-            },
-            body: json.encode(bancoToUpdate.toJson()),
-          );
+          if (kDebugMode) {
+            print('Atualizando banco: ${json.encode(bancoToUpdate.toJson())}');
+          }
+
+          // Usar o serviço para atualizar o banco
+          final updatedBanco = await _bancoService.updateBanco(bancoToUpdate);
 
           if (kDebugMode) {
-            print('Status code da atualização: ${response.statusCode}');
-            print('Resposta da atualização: ${response.body}');
+            print(
+                'Banco atualizado: ${updatedBanco.bancoId} - ${updatedBanco.nome}');
           }
 
-          if (response.statusCode == 200 || response.statusCode == 204) {
-            _showSuccessMessage('Banco atualizado com sucesso!');
-            await _loadBancos();
-            _resetForm();
-          } else {
-            throw Exception('Falha ao atualizar banco: ${response.statusCode}');
-          }
+          _showSuccessMessage('Banco atualizado com sucesso!');
+
+          // Forçar uma recarga completa dos bancos
+          await Future.delayed(Duration(
+              milliseconds:
+                  500)); // Pequeno atraso para garantir que a API processou a atualização
+          await _loadBancos();
+
+          _resetForm();
         } else {
           // Criar novo banco
           final newBanco = BancoModel(
@@ -304,28 +323,27 @@ class _BankRegistrationPageState extends State<BankRegistrationPage> {
             pix: _pixController.text,
           );
 
-          // Fazer requisição POST diretamente
-          final response = await http.post(
-            Uri.parse('${AppConfig.apiBaseUrl}/bancos'),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $_token',
-            },
-            body: json.encode(newBanco.toJson()),
-          );
+          if (kDebugMode) {
+            print('Criando banco: ${json.encode(newBanco.toJson())}');
+          }
+
+          // Usar o serviço para criar o banco
+          final createdBanco = await _bancoService.createBanco(newBanco);
 
           if (kDebugMode) {
-            print('Status code da criação: ${response.statusCode}');
-            print('Resposta da criação: ${response.body}');
+            print(
+                'Banco criado: ${createdBanco.bancoId} - ${createdBanco.nome}');
           }
 
-          if (response.statusCode == 201 || response.statusCode == 200) {
-            _showSuccessMessage('Banco cadastrado com sucesso!');
-            await _loadBancos();
-            _resetForm();
-          } else {
-            throw Exception('Falha ao criar banco: ${response.statusCode}');
-          }
+          _showSuccessMessage('Banco cadastrado com sucesso!');
+
+          // Forçar uma recarga completa dos bancos
+          await Future.delayed(Duration(
+              milliseconds:
+                  500)); // Pequeno atraso para garantir que a API processou a criação
+          await _loadBancos();
+
+          _resetForm();
         }
       } catch (e) {
         if (kDebugMode) {
@@ -333,6 +351,10 @@ class _BankRegistrationPageState extends State<BankRegistrationPage> {
         }
         _showErrorMessage(
             'Erro ao ${isEditing ? 'atualizar' : 'cadastrar'} banco: $e');
+      } finally {
+        setState(() {
+          isLoading = false; // Esconder indicador de carregamento
+        });
       }
     }
   }
@@ -357,26 +379,11 @@ class _BankRegistrationPageState extends State<BankRegistrationPage> {
 
   void _deleteBank(BancoModel banco) async {
     try {
-      // Fazer requisição DELETE diretamente
-      final response = await http.delete(
-        Uri.parse('${AppConfig.apiBaseUrl}/bancos/${banco.bancoId}'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $_token',
-        },
-      );
+      // Usar o serviço para excluir o banco
+      await _bancoService.deleteBanco(banco.bancoId!, _usuarioId);
 
-      if (kDebugMode) {
-        print('Status code da exclusão: ${response.statusCode}');
-        print('Resposta da exclusão: ${response.body}');
-      }
-
-      if (response.statusCode == 200 || response.statusCode == 204) {
-        _showSuccessMessage('Banco excluído com sucesso!');
-        await _loadBancos();
-      } else {
-        throw Exception('Falha ao excluir banco: ${response.statusCode}');
-      }
+      _showSuccessMessage('Banco excluído com sucesso!');
+      await _loadBancos();
     } catch (e) {
       if (kDebugMode) {
         print('Erro ao excluir banco: $e');
@@ -385,36 +392,35 @@ class _BankRegistrationPageState extends State<BankRegistrationPage> {
     }
   }
 
-  void _resetForm() {
-    setState(() {
-      isEditing = false;
-      editingBancoId = null;
-      selectedBank = null;
-      _agencyController.clear();
-      _accountController.clear();
-      _pixController.clear();
-    });
-  }
-
-  void _showSuccessMessage(String message) {
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-      ),
-    );
-  }
-
-  void _showErrorMessage(String message) {
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
+  void _showDeleteConfirmation(BancoModel banco) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Color(0xFF374151),
+          title:
+              Text('Confirmar exclusão', style: TextStyle(color: Colors.white)),
+          content: Text(
+            'Deseja realmente excluir o banco ${banco.nome}?',
+            style: TextStyle(color: Colors.white),
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancelar', style: TextStyle(color: Colors.white)),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Excluir', style: TextStyle(color: Colors.red)),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deleteBank(banco);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -614,38 +620,6 @@ class _BankRegistrationPageState extends State<BankRegistrationPage> {
                 ],
               ),
             ),
-    );
-  }
-
-  void _showDeleteConfirmation(BancoModel banco) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Color(0xFF374151),
-          title:
-              Text('Confirmar exclusão', style: TextStyle(color: Colors.white)),
-          content: Text(
-            'Deseja realmente excluir o banco ${banco.nome}?',
-            style: TextStyle(color: Colors.white),
-          ),
-          actions: [
-            TextButton(
-              child: Text('Cancelar', style: TextStyle(color: Colors.white)),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Excluir', style: TextStyle(color: Colors.red)),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _deleteBank(banco);
-              },
-            ),
-          ],
-        );
-      },
     );
   }
 }

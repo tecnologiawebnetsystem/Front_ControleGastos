@@ -38,15 +38,18 @@ void main() async {
 
   runApp(MyApp(
     initialRoute: isAuthenticated ? '/' : '/login',
+    authService: authService,
   ));
 }
 
 class MyApp extends StatelessWidget {
   final String initialRoute;
+  final AuthService authService;
 
   const MyApp({
     Key? key,
     required this.initialRoute,
+    required this.authService,
   }) : super(key: key);
 
   @override

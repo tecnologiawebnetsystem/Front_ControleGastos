@@ -63,7 +63,17 @@ class _LoginPageState extends State<LoginPage> {
         }
 
         // Usar pushAndRemoveUntil para garantir que a página de login seja removida da pilha
-        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        // Após o login bem-sucedido, antes de navegar para a página inicial
+        if (response.success) {
+          // Navegar para a página inicial
+          Navigator.of(context).pushReplacementNamed('/');
+        } else {
+          // Mostrar mensagem de erro
+          setState(() {
+            _errorMessage = response.message ?? 'Erro ao fazer login';
+            _isLoading = false;
+          });
+        }
       } else {
         if (kDebugMode) {
           print('Login falhou: ${response.message}');
