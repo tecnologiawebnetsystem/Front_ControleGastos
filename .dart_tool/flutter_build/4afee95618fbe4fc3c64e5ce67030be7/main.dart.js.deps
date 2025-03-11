@@ -1146,6 +1146,7 @@ file:///C:/repos/Front_ControleGastos/lib/models/banco_model.dart
 file:///C:/repos/Front_ControleGastos/lib/models/bank.dart
 file:///C:/repos/Front_ControleGastos/lib/models/chat_message.dart
 file:///C:/repos/Front_ControleGastos/lib/models/contract_type.dart
+file:///C:/repos/Front_ControleGastos/lib/models/empresa_model.dart
 file:///C:/repos/Front_ControleGastos/lib/models/expense_category.dart
 file:///C:/repos/Front_ControleGastos/lib/models/operation_type.dart
 file:///C:/repos/Front_ControleGastos/lib/models/payment_status.dart
@@ -1169,6 +1170,7 @@ file:///C:/repos/Front_ControleGastos/lib/services/ai_chat_service.dart
 file:///C:/repos/Front_ControleGastos/lib/services/api_service.dart
 file:///C:/repos/Front_ControleGastos/lib/services/auth_service.dart
 file:///C:/repos/Front_ControleGastos/lib/services/banco_service.dart
+file:///C:/repos/Front_ControleGastos/lib/services/empresa_service.dart
 file:///C:/repos/Front_ControleGastos/lib/theme/app_theme.dart
 file:///C:/src/flutter/bin/cache/flutter_web_sdk/kernel/dart2js_platform.dill
 file:///C:/src/flutter/packages/flutter/lib/animation.dart

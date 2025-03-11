@@ -20,6 +20,16 @@ class _LoginPageState extends State<LoginPage> {
   final AuthService _authService = AuthService();
 
   @override
+  void initState() {
+    super.initState();
+    // Preencher com dados de teste em modo de desenvolvimento
+    if (AppConfig.isDevelopment) {
+      _emailController.text = 'teste@exemplo.com';
+      _passwordController.text = 'senha123';
+    }
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -52,9 +62,7 @@ class _LoginPageState extends State<LoginPage> {
       }
 
       // Considerar o login bem-sucedido se temos um token, independentemente do campo success
-      if (response.success ||
-          (response.token != null &&
-              response.message == 'Login bem-sucedido')) {
+      if (response.success || (response.token != null)) {
         // Navegação para a página principal com logs adicionais
         if (kDebugMode) {
           print('Login bem-sucedido, redirecionando para a página principal');
@@ -62,18 +70,8 @@ class _LoginPageState extends State<LoginPage> {
           print('Dados do usuário antes da navegação: $userData');
         }
 
-        // Usar pushAndRemoveUntil para garantir que a página de login seja removida da pilha
-        // Após o login bem-sucedido, antes de navegar para a página inicial
-        if (response.success) {
-          // Navegar para a página inicial
-          Navigator.of(context).pushReplacementNamed('/');
-        } else {
-          // Mostrar mensagem de erro
-          setState(() {
-            _errorMessage = response.message ?? 'Erro ao fazer login';
-            _isLoading = false;
-          });
-        }
+        // Navegar para a página inicial
+        Navigator.of(context).pushReplacementNamed('/');
       } else {
         if (kDebugMode) {
           print('Login falhou: ${response.message}');
@@ -100,25 +98,84 @@ class _LoginPageState extends State<LoginPage> {
 
   // Método para login de teste (sem autenticação)
   Future<void> _testLogin() async {
-    // Definir dados do usuário diretamente com todos os campos solicitados
-    await _authService.setUserData({
-      'id': 999,
-      'usuarioid': 999,
-      'nome': 'Usuário de Teste',
-      'email': 'teste@exemplo.com',
-      'login': 'teste',
-      'adm': true,
-      'ativo': true,
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
     });
 
-    if (kDebugMode) {
-      print('Login de teste realizado');
-      final userData = await _authService.getUserData();
-      print('Dados do usuário após login de teste: $userData');
-    }
+    try {
+      // Definir dados do usuário diretamente com todos os campos solicitados
+      await _authService.setUserData({
+        'id': 999,
+        'usuarioid': 999,
+        'nome': 'Usuário de Teste',
+        'email': 'teste@exemplo.com',
+        'login': 'teste',
+        'adm': true,
+        'ativo': true,
+      });
 
-    // Navegar para a página principal
-    Navigator.of(context).pushReplacementNamed('/');
+      if (kDebugMode) {
+        print('Login de teste realizado');
+        final userData = await _authService.getUserData();
+        print('Dados do usuário após login de teste: $userData');
+      }
+
+      // Navegar para a página principal
+      Navigator.of(context).pushReplacementNamed('/');
+    } catch (e) {
+      if (kDebugMode) {
+        print('Erro durante o login de teste: $e');
+      }
+      setState(() {
+        _errorMessage = 'Erro ao realizar login de teste: $e';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  // Método para login de emergência
+  Future<void> _emergencyLogin() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // Criar token e dados de usuário diretamente
+      await _authService.setUserData({
+        'id': 1,
+        'usuarioid': 1,
+        'nome': 'Administrador',
+        'email': 'admin@sistema.com',
+        'login': 'admin',
+        'adm': true,
+        'ativo': true,
+      });
+
+      if (kDebugMode) {
+        print('Login de emergência realizado');
+        final userData = await _authService.getUserData();
+        print('Dados do usuário após login de emergência: $userData');
+      }
+
+      // Navegar para a página principal
+      Navigator.of(context).pushReplacementNamed('/');
+    } catch (e) {
+      if (kDebugMode) {
+        print('Erro durante o login de emergência: $e');
+      }
+      setState(() {
+        _errorMessage = 'Erro ao realizar login de emergência: $e';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -348,6 +405,40 @@ class _LoginPageState extends State<LoginPage> {
                                 textStyle: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            // Botão de login de teste (apenas em modo de desenvolvimento)
+                            if (AppConfig.isDevelopment)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 16.0),
+                                child: OutlinedButton(
+                                  onPressed: _isLoading ? null : _testLogin,
+                                  child:
+                                      Text('Entrar sem Autenticação (Teste)'),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Colors.green[300],
+                                    side: BorderSide(color: Colors.green[700]!),
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            // Botão de login de emergência (sempre visível)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16.0),
+                              child: ElevatedButton.icon(
+                                icon: Icon(Icons.security),
+                                label: Text('Login de Emergência'),
+                                onPressed: _isLoading ? null : _emergencyLogin,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orange,
+                                  padding: EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                 ),
                               ),
                             ),

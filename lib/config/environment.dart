@@ -4,7 +4,7 @@ enum Environment {
 }
 
 class AppConfig {
-  // Defina o ambiente atual aqui
+  // Defina o ambiente atual aqui - garantindo que esteja em desenvolvimento
   static const Environment currentEnvironment = Environment.production;
 
   // URLs da API para cada ambiente

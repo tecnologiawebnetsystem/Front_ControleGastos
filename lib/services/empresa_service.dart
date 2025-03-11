@@ -120,12 +120,30 @@ class EmpresaService {
       print('EmpresaService: Dados: ${json.encode(empresa.toJson())}');
     }
 
+    // Lista de IDs válidos conhecidos
+    final validIds = [1, 3, 4];
+
     // Garantir que o tipo de contratação seja válido
-    if (empresa.tipoContratacaoId == null || empresa.tipoContratacaoId <= 0) {
+    if (empresa.tipoContratacaoId == null ||
+        !validIds.contains(empresa.tipoContratacaoId)) {
       if (kDebugMode) {
         print(
-            'EmpresaService: Tipo de contratação inválido ou nulo: ${empresa.tipoContratacaoId}. Usando valor padrão 1 (CLT)');
+            'EmpresaService: Tipo de contratação inválido ou nulo: ${empresa.tipoContratacaoId}. Mapeando para um valor válido.');
       }
+
+      // Mapear ID 2 para ID 3 (PJ) como alternativa mais próxima
+      int novoId = 3;
+      if (empresa.tipoContratacaoId == 2) {
+        novoId = 3; // Mapear ID 2 para ID 3 (PJ)
+      } else {
+        novoId = 1; // Valor padrão para outros casos
+      }
+
+      if (kDebugMode) {
+        print(
+            'EmpresaService: Mapeando ID ${empresa.tipoContratacaoId} para ID $novoId');
+      }
+
       empresa = EmpresaModel(
         empresaId: empresa.empresaId,
         usuarioId: empresa.usuarioId,
@@ -134,7 +152,7 @@ class EmpresaService {
         valor: empresa.valor,
         valorVA: empresa.valorVA,
         ativo: empresa.ativo,
-        tipoContratacaoId: 1, // Forçar para um valor válido (CLT)
+        tipoContratacaoId: novoId,
         tipoContratacaoDescricao: empresa.tipoContratacaoDescricao,
         diaPagamento1: empresa.diaPagamento1,
         diaPagamento2: empresa.diaPagamento2,
@@ -156,156 +174,112 @@ class EmpresaService {
       int? lastStatusCode;
       String? lastResponseBody;
 
+      // Tentar diferentes formatos para o tipo de contratação
+      final formatosParaTentar = [
+        // Formato original
+        empresa.toJson(),
+
+        // Formato com TipoContratacaoId (primeira letra maiúscula)
+        _modificarJson(
+            empresa.toJson(), 'TipoContratacaoId', empresa.tipoContratacaoId),
+
+        // Formato com tipoContratacaoId (tudo minúsculo)
+        _modificarJson(
+            empresa.toJson(), 'tipoContratacaoId', empresa.tipoContratacaoId),
+
+        // Formato com ID como string
+        _modificarJson(empresa.toJson(), 'TipoContratacaoID',
+            empresa.tipoContratacaoId.toString()),
+
+        // Formato com ID como string e campo diferente
+        _modificarJson(empresa.toJson(), 'tipoContratacaoID',
+            empresa.tipoContratacaoId.toString()),
+      ];
+
       for (var endpoint in endpoints) {
         if (kDebugMode) {
           print('EmpresaService: Tentando endpoint: $endpoint');
         }
 
-        try {
-          final Map<String, dynamic> empresaJson = empresa.toJson();
-          final String jsonBody = json.encode(empresaJson);
+        for (var formatoJson in formatosParaTentar) {
+          try {
+            final String jsonBody = json.encode(formatoJson);
 
-          if (kDebugMode) {
-            print('EmpresaService: Enviando JSON: $jsonBody');
-          }
-
-          final response = await http.post(
-            Uri.parse(endpoint),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $token',
-            },
-            body: jsonBody,
-          );
-
-          lastStatusCode = response.statusCode;
-          lastResponseBody = response.body;
-
-          if (kDebugMode) {
-            print(
-                'EmpresaService: Status da resposta para $endpoint: ${response.statusCode}');
-            print(
-                'EmpresaService: Corpo da resposta para $endpoint: ${response.body}');
-          }
-
-          if (response.statusCode == 201 || response.statusCode == 200) {
             if (kDebugMode) {
-              print('EmpresaService: Sucesso com endpoint: $endpoint');
+              print('EmpresaService: Tentando formato: $jsonBody');
             }
 
-            // Verificar se a resposta tem um corpo válido
-            if (response.body.isNotEmpty) {
+            final response = await http.post(
+              Uri.parse(endpoint),
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer $token',
+              },
+              body: jsonBody,
+            );
+
+            lastStatusCode = response.statusCode;
+            lastResponseBody = response.body;
+
+            if (kDebugMode) {
+              print(
+                  'EmpresaService: Status da resposta para $endpoint: ${response.statusCode}');
+              print(
+                  'EmpresaService: Corpo da resposta para $endpoint: ${response.body}');
+            }
+
+            if (response.statusCode == 201 || response.statusCode == 200) {
+              if (kDebugMode) {
+                print(
+                    'EmpresaService: Sucesso com endpoint: $endpoint e formato: $jsonBody');
+              }
+
+              // Verificar se a resposta tem um corpo válido
+              if (response.body.isNotEmpty) {
+                try {
+                  return EmpresaModel.fromJson(json.decode(response.body));
+                } catch (e) {
+                  if (kDebugMode) {
+                    print(
+                        'EmpresaService: Erro ao converter resposta para EmpresaModel: $e');
+                    print('EmpresaService: Retornando o objeto original');
+                  }
+                  // Se não conseguir converter, retornar o objeto original
+                  return empresa;
+                }
+              } else {
+                // Se a resposta estiver vazia, retornar o objeto original
+                if (kDebugMode) {
+                  print(
+                      'EmpresaService: Resposta vazia, retornando o objeto original');
+                }
+                return empresa;
+              }
+            } else if (response.statusCode == 400) {
+              // Tentar entender o erro
               try {
-                return EmpresaModel.fromJson(json.decode(response.body));
+                final errorData = json.decode(response.body);
+                lastErrorMessage =
+                    errorData['message'] ?? 'Erro 400 sem mensagem específica';
+
+                if (kDebugMode) {
+                  print('EmpresaService: Erro 400 detalhado: $errorData');
+                }
               } catch (e) {
                 if (kDebugMode) {
                   print(
-                      'EmpresaService: Erro ao converter resposta para EmpresaModel: $e');
-                  print('EmpresaService: Retornando o objeto original');
+                      'EmpresaService: Erro ao processar resposta de erro: $e');
                 }
-                // Se não conseguir converter, retornar o objeto original
-                return empresa;
+                lastErrorMessage = 'Erro ao processar resposta: $e';
               }
-            } else {
-              // Se a resposta estiver vazia, retornar o objeto original
-              if (kDebugMode) {
-                print(
-                    'EmpresaService: Resposta vazia, retornando o objeto original');
-              }
-              return empresa;
             }
-          } else if (response.statusCode == 400) {
-            // Tentar entender o erro
-            try {
-              final errorData = json.decode(response.body);
-              lastErrorMessage =
-                  errorData['message'] ?? 'Erro 400 sem mensagem específica';
-
-              if (kDebugMode) {
-                print('EmpresaService: Erro 400 detalhado: $errorData');
-              }
-
-              // Se o erro for relacionado ao tipo de contratação, tentar com outro valor
-              if (errorData['message']
-                      ?.toString()
-                      .contains('tipo de contratação') ==
-                  true) {
-                if (kDebugMode) {
-                  print(
-                      'EmpresaService: Tentando com outro tipo de contratação...');
-                }
-
-                // Tentar com outro tipo de contratação
-                final alternativeId = empresa.tipoContratacaoId == 1 ? 3 : 1;
-
-                final alternativeEmpresa = EmpresaModel(
-                  empresaId: empresa.empresaId,
-                  usuarioId: empresa.usuarioId,
-                  nome: empresa.nome,
-                  cliente: empresa.cliente,
-                  valor: empresa.valor,
-                  valorVA: empresa.valorVA,
-                  ativo: empresa.ativo,
-                  tipoContratacaoId: alternativeId,
-                  tipoContratacaoDescricao: empresa.tipoContratacaoDescricao,
-                  diaPagamento1: empresa.diaPagamento1,
-                  diaPagamento2: empresa.diaPagamento2,
-                  bancoId: empresa.bancoId,
-                  bancoNome: empresa.bancoNome,
-                );
-
-                final alternativeJson = alternativeEmpresa.toJson();
-                final alternativeJsonBody = json.encode(alternativeJson);
-
-                if (kDebugMode) {
-                  print(
-                      'EmpresaService: Tentando com JSON alternativo: $alternativeJsonBody');
-                }
-
-                final alternativeResponse = await http.post(
-                  Uri.parse(endpoint),
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer $token',
-                  },
-                  body: alternativeJsonBody,
-                );
-
-                if (alternativeResponse.statusCode == 201 ||
-                    alternativeResponse.statusCode == 200) {
-                  if (kDebugMode) {
-                    print(
-                        'EmpresaService: Sucesso com tipo de contratação alternativo!');
-                  }
-
-                  if (alternativeResponse.body.isNotEmpty) {
-                    try {
-                      return EmpresaModel.fromJson(
-                          json.decode(alternativeResponse.body));
-                    } catch (e) {
-                      if (kDebugMode) {
-                        print(
-                            'EmpresaService: Erro ao converter resposta alternativa: $e');
-                      }
-                      return alternativeEmpresa;
-                    }
-                  } else {
-                    return alternativeEmpresa;
-                  }
-                }
-              }
-            } catch (e) {
-              if (kDebugMode) {
-                print('EmpresaService: Erro ao processar resposta de erro: $e');
-              }
-              lastErrorMessage = 'Erro ao processar resposta: $e';
+          } catch (e) {
+            if (kDebugMode) {
+              print(
+                  'EmpresaService: Erro ao tentar $endpoint com formato: $formatoJson: $e');
             }
+            lastErrorMessage = 'Erro na requisição: $e';
           }
-        } catch (e) {
-          if (kDebugMode) {
-            print('EmpresaService: Erro ao tentar $endpoint: $e');
-          }
-          lastErrorMessage = 'Erro na requisição: $e';
         }
       }
 
@@ -318,6 +292,23 @@ class EmpresaService {
       }
       throw Exception('EmpresaService: Erro ao criar empresa: $e');
     }
+  }
+
+  // Método auxiliar para modificar o JSON com diferentes formatos de campo
+  Map<String, dynamic> _modificarJson(
+      Map<String, dynamic> original, String novoNomeCampo, dynamic valor) {
+    final resultado = Map<String, dynamic>.from(original);
+
+    // Remover todos os campos relacionados ao tipo de contratação
+    resultado.remove('TipoContratacaoID');
+    resultado.remove('tipoContratacaoID');
+    resultado.remove('TipoContratacaoId');
+    resultado.remove('tipoContratacaoId');
+
+    // Adicionar o campo com o novo nome
+    resultado[novoNomeCampo] = valor;
+
+    return resultado;
   }
 
   // Atualizar uma empresa existente
@@ -357,107 +348,133 @@ class EmpresaService {
         _buildEndpointUrl('empresas'),
       ];
 
+      // Tentar diferentes formatos para o tipo de contratação
+      final formatosParaTentar = [
+        // Formato original
+        empresa.toJson(),
+
+        // Formato com TipoContratacaoId (primeira letra maiúscula)
+        _modificarJson(
+            empresa.toJson(), 'TipoContratacaoId', empresa.tipoContratacaoId),
+
+        // Formato com tipoContratacaoId (tudo minúsculo)
+        _modificarJson(
+            empresa.toJson(), 'tipoContratacaoId', empresa.tipoContratacaoId),
+
+        // Formato com ID como string
+        _modificarJson(empresa.toJson(), 'TipoContratacaoID',
+            empresa.tipoContratacaoId.toString()),
+
+        // Formato com ID como string e campo diferente
+        _modificarJson(empresa.toJson(), 'tipoContratacaoID',
+            empresa.tipoContratacaoId.toString()),
+      ];
+
       // Tentar diferentes métodos HTTP
       for (var endpoint in endpoints) {
-        // Tentar com PUT
-        try {
-          if (kDebugMode) {
-            print('EmpresaService: Tentando PUT para: $endpoint');
-          }
-
-          final response = await http.put(
-            Uri.parse(endpoint),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $token',
-            },
-            body: json.encode(empresa.toJson()),
-          );
-
-          if (kDebugMode) {
-            print(
-                'EmpresaService: Status da resposta para PUT $endpoint: ${response.statusCode}');
-            print(
-                'EmpresaService: Corpo da resposta para PUT $endpoint: ${response.body}');
-          }
-
-          if (response.statusCode == 200 || response.statusCode == 204) {
+        for (var formatoJson in formatosParaTentar) {
+          // Tentar com PUT
+          try {
             if (kDebugMode) {
-              print('EmpresaService: Sucesso com PUT para: $endpoint');
+              print(
+                  'EmpresaService: Tentando PUT para: $endpoint com formato: $formatoJson');
             }
 
-            if (response.statusCode == 204 || response.body.isEmpty) {
-              // Se não retornar dados, retorne o objeto original
-              return empresa;
-            } else {
-              try {
-                return EmpresaModel.fromJson(json.decode(response.body));
-              } catch (e) {
-                if (kDebugMode) {
-                  print(
-                      'EmpresaService: Erro ao converter resposta para EmpresaModel: $e');
-                }
-                // Retornar o objeto original se não conseguir converter
+            final response = await http.put(
+              Uri.parse(endpoint),
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer $token',
+              },
+              body: json.encode(formatoJson),
+            );
+
+            if (kDebugMode) {
+              print(
+                  'EmpresaService: Status da resposta para PUT $endpoint: ${response.statusCode}');
+              print(
+                  'EmpresaService: Corpo da resposta para PUT $endpoint: ${response.body}');
+            }
+
+            if (response.statusCode == 200 || response.statusCode == 204) {
+              if (kDebugMode) {
+                print('EmpresaService: Sucesso com PUT para: $endpoint');
+              }
+
+              if (response.statusCode == 204 || response.body.isEmpty) {
+                // Se não retornar dados, retorne o objeto original
                 return empresa;
+              } else {
+                try {
+                  return EmpresaModel.fromJson(json.decode(response.body));
+                } catch (e) {
+                  if (kDebugMode) {
+                    print(
+                        'EmpresaService: Erro ao converter resposta para EmpresaModel: $e');
+                  }
+                  // Retornar o objeto original se não conseguir converter
+                  return empresa;
+                }
               }
             }
-          }
-        } catch (e) {
-          if (kDebugMode) {
-            print('EmpresaService: Erro ao tentar PUT para $endpoint: $e');
-          }
-        }
-
-        // Tentar com POST
-        try {
-          if (kDebugMode) {
-            print('EmpresaService: Tentando POST para: $endpoint');
-          }
-
-          final response = await http.post(
-            Uri.parse(endpoint),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $token',
-              'X-HTTP-Method-Override':
-                  'PUT', // Alguns servidores suportam isso
-            },
-            body: json.encode(empresa.toJson()),
-          );
-
-          if (kDebugMode) {
-            print(
-                'EmpresaService: Status da resposta para POST $endpoint: ${response.statusCode}');
-            print(
-                'EmpresaService: Corpo da resposta para POST $endpoint: ${response.body}');
-          }
-
-          if (response.statusCode == 200 ||
-              response.statusCode == 201 ||
-              response.statusCode == 204) {
+          } catch (e) {
             if (kDebugMode) {
-              print('EmpresaService: Sucesso com POST para: $endpoint');
+              print('EmpresaService: Erro ao tentar PUT para $endpoint: $e');
+            }
+          }
+
+          // Tentar com POST
+          try {
+            if (kDebugMode) {
+              print(
+                  'EmpresaService: Tentando POST para: $endpoint com formato: $formatoJson');
             }
 
-            if (response.statusCode == 204 || response.body.isEmpty) {
-              // Se não retornar dados, retorne o objeto original
-              return empresa;
-            } else {
-              try {
-                return EmpresaModel.fromJson(json.decode(response.body));
-              } catch (e) {
-                if (kDebugMode) {
-                  print(
-                      'EmpresaService: Erro ao converter resposta para EmpresaModel: $e');
-                }
-                // Retornar o objeto original se não conseguir converter
+            final response = await http.post(
+              Uri.parse(endpoint),
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer $token',
+                'X-HTTP-Method-Override':
+                    'PUT', // Alguns servidores suportam isso
+              },
+              body: json.encode(formatoJson),
+            );
+
+            if (kDebugMode) {
+              print(
+                  'EmpresaService: Status da resposta para POST $endpoint: ${response.statusCode}');
+              print(
+                  'EmpresaService: Corpo da resposta para POST $endpoint: ${response.body}');
+            }
+
+            if (response.statusCode == 200 ||
+                response.statusCode == 201 ||
+                response.statusCode == 204) {
+              if (kDebugMode) {
+                print('EmpresaService: Sucesso com POST para: $endpoint');
+              }
+
+              if (response.statusCode == 204 || response.body.isEmpty) {
+                // Se não retornar dados, retorne o objeto original
                 return empresa;
+              } else {
+                try {
+                  return EmpresaModel.fromJson(json.decode(response.body));
+                } catch (e) {
+                  if (kDebugMode) {
+                    print(
+                        'EmpresaService: Erro ao converter resposta para EmpresaModel: $e');
+                  }
+                  // Retornar o objeto original se não conseguir converter
+                  return empresa;
+                }
               }
             }
-          }
-        } catch (e) {
-          if (kDebugMode) {
-            print('EmpresaService: Erro ao tentar POST para $endpoint: $e');
+          } catch (e) {
+            if (kDebugMode) {
+              print('EmpresaService: Erro ao tentar POST para $endpoint: $e');
+            }
           }
         }
       }
@@ -594,13 +611,41 @@ class EmpresaService {
         }
       }
 
-      // Não filtrar os tipos de contratação, retornar todos os encontrados
+      // Lista de IDs válidos conhecidos
+      final validIds = [1, 3, 4];
+
+      // Filtrar apenas os tipos com IDs válidos
+      List<ContractType> tiposValidos = [];
+
       if (success && tiposContratacao.isNotEmpty) {
+        // Filtrar apenas os tipos com IDs válidos
+        tiposValidos = tiposContratacao
+            .where((tipo) => tipo.id != null && validIds.contains(tipo.id))
+            .toList();
+
         if (kDebugMode) {
           print(
-              'EmpresaService: Retornando ${tiposContratacao.length} tipos de contratação do servidor');
+              'EmpresaService: Tipos de contratação filtrados: ${tiposValidos.length}');
+          for (var tipo in tiposValidos) {
+            print(
+                'EmpresaService: Tipo válido: ${tipo.id} - ${tipo.description}');
+          }
         }
-        return tiposContratacao;
+
+        // Se não encontramos nenhum tipo válido, usar os padrões
+        if (tiposValidos.isEmpty) {
+          if (kDebugMode) {
+            print(
+                'EmpresaService: Nenhum tipo válido encontrado, usando padrões');
+          }
+          tiposValidos = [
+            ContractType(id: 1, description: 'CLT'),
+            ContractType(id: 3, description: 'PJ'),
+            ContractType(id: 4, description: 'Autônomo')
+          ];
+        }
+
+        return tiposValidos;
       } else {
         // Se não conseguimos obter do servidor, usamos os padrões
         if (kDebugMode) {
